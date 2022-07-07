@@ -5,12 +5,36 @@
 
 const BLANK = false;
 
-const gameBoard = (() => {
+const game = (() => {
+
+
+    return {
+
+    };
+})();
+
+const board = (() => {
     let board = [[BLANK, BLANK, BLANK],
                 [BLANK, BLANK, BLANK],
                 [BLANK, BLANK, BLANK]];
 
     
+    return {
+
+    };
+})();
+
+const Player = () => {
+
+
+    return {
+
+    };
+};
+
+const display = (() => {
+
+
     return {
 
     };
