@@ -9,6 +9,8 @@ const O = -1;
 let playerX = null;
 let playerO = null;
 let currentPlayer = null;
+let turnCount = 0;
+const cells = document.querySelectorAll('.cell');
 
 const game = (() => {
 
@@ -16,9 +18,12 @@ const game = (() => {
     pvp.addEventListener('click', () => startPVPGame());
 
     function startPVPGame() {
+        turnCount = 0;
+        display.clearBoard();
         playerX = Player(X, 'images/x.png');
         playerO = Player(O, 'images/o.png');
         currentPlayer = playerX;
+        board.generateCells();
     }
 
     return {
@@ -30,12 +35,14 @@ const board = (() => {
                 [BLANK, BLANK, BLANK],
                 [BLANK, BLANK, BLANK]];
 
-    const cells = document.querySelectorAll('.cell');
-    cells.forEach(element => {
-        element.addEventListener('click', event => placeMarker(event.target.dataset.index));
-    });
+    function generateCells() {
+        cells.forEach(element => {
+            element.addEventListener('click', placeMarker);
+        });
+    }
 
-    function placeMarker(index) {
+    function placeMarker(event) {
+        index = event.target.dataset.index;
         indexSplit = index.split(',');
         const x = indexSplit[0];
         const y = indexSplit[1];
@@ -44,10 +51,12 @@ const board = (() => {
             board[x][y] = currentPlayer.getSymbol();
             const cell = document.querySelector(`div[data-index="${index}"]`);
             cell.appendChild(currentPlayer.getImg());
+            turnCount++;
         }
 
         if (isGameOver(x, y)) {
             display.showWinner();
+            disableCells();
         } else {
             if (currentPlayer === playerX) {
                 currentPlayer = playerO;
@@ -58,23 +67,45 @@ const board = (() => {
     }
 
     function isGameOver(x, y) {
-        if (Math.abs(board[0][y] + board[1][y] + board[2][y] === 3) ||
-            Math.abs(board[x][0] + board[x][1] + board[x][2] === 3)) {
+        if (Math.abs(board[0][y] + board[1][y] + board[2][y]) === 3 ||
+            Math.abs(board[x][0] + board[x][1] + board[x][2]) === 3) {
+            clearBoard();
             return true;
         } else if (x === y) {
-            if (Math.abs(board[0][0] + board[1][1] + board[2][2] === 3)) {
+            if (Math.abs(board[0][0] + board[1][1] + board[2][2]) === 3) {
+                clearBoard();
                 return true;
             }
         } else if ((x === 0 && y === 2) || (x === 2 && y === 0)) {
-            if (Math.abs(board[0][2] + board[1][1] + board[0][2] === 3)) {
+            if (Math.abs(board[0][2] + board[1][1] + board[0][2]) === 3) {
+                clearBoard();
                 return true;
             }
+        }
+        if (turnCount === 9) {
+            currentPlayer = null;
+            turnCount = 0;
+            return true;
         }
         return false;
     }
 
-    return {
+    function clearBoard() {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                board[i][j] = BLANK;
+            }
+        }
+    }
 
+    function disableCells() {
+        cells.forEach(element => {
+            element.removeEventListener('click', placeMarker);
+        });
+    }
+
+    return {
+        generateCells
     };
 })();
 
@@ -100,20 +131,40 @@ const display = (() => {
 
     const showWinner = () => {
         let winner;
-        if (currentPlayer.getSymbol() === X) {
+        if (currentPlayer === null) {
+            winner = null;
+        } else if (currentPlayer.getSymbol() === X) {
             winner = 'X';
         } else {
             winner = 'O';
         }
 
         const p = document.createElement('p');
-        p.innerHTML = `${winner} wins this round!`;
+        if (winner === null) {
+            p.innerHTML = `It's a draw!`;
+        } else {
+            p.innerHTML = `${winner} wins this round!`;
+        }
+        
+        p.id = 'winner';
 
-        console.log(`${winner} wins this round!`);
+        console.log(p.innerHTML);
         container.appendChild(p);
     }
+     
+    const clearBoard = () => {
+        cells.forEach(element => {
+            element.replaceChildren();
+        });
+        const p = document.getElementById('winner');
+        if (p !== null) {
+            container.removeChild(p);
+        }
+
+    };
 
     return {
-        showWinner
+        showWinner,
+        clearBoard
     };
 })();
