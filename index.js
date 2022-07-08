@@ -18,6 +18,7 @@ const game = (() => {
     pvp.addEventListener('click', () => startPVPGame());
 
     function startPVPGame() {
+        console.log('starting new PVP game');
         turnCount = 0;
         display.clearBoard();
         playerX = Player(X, 'images/x.png');
@@ -55,6 +56,7 @@ const board = (() => {
         }
 
         if (isGameOver(x, y)) {
+            clearBoard();
             display.showWinner();
             disableCells();
         } else {
@@ -69,22 +71,18 @@ const board = (() => {
     function isGameOver(x, y) {
         if (Math.abs(board[0][y] + board[1][y] + board[2][y]) === 3 ||
             Math.abs(board[x][0] + board[x][1] + board[x][2]) === 3) {
-            clearBoard();
             return true;
         } else if (x === y) {
             if (Math.abs(board[0][0] + board[1][1] + board[2][2]) === 3) {
-                clearBoard();
                 return true;
             }
         } else if ((x === 0 && y === 2) || (x === 2 && y === 0)) {
             if (Math.abs(board[0][2] + board[1][1] + board[0][2]) === 3) {
-                clearBoard();
                 return true;
             }
         }
         if (turnCount === 9) {
             currentPlayer = null;
-            turnCount = 0;
             return true;
         }
         return false;
